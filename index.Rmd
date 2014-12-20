@@ -11,12 +11,69 @@ mode        : selfcontained # {standalone, draft}
 knit        : slidify::knit2slides
 ---
 
-## Read-And-Delete
+## The diamond pricer app
 
-Test
+* Diamond pricer uses the ggplot2 diamonds dataset, containing data about almost 54,000 diamonds to predict the price of a diamond given some values entered by the user.
+
+* The use can enter a limited number of informations about the diamond and get an estimate given these informations.
+
+* Additionnaly, the user can see the expected price of his diamond is the overall distribution od diamonds, to understand if the diamond is exceptionnally expensive, or average.
 
 --- .class #id 
 
-## Operating with limited information
+## What makes the cost of a diamond
 
-Test
+* An examination of a model of price regressed against all other predictors in the dataset shows that different variables have vastly different influence on the price.
+
+* Carat seems to be the most influent variable, but the level of clarity and the color are also important.
+
+```{r, echo=FALSE}
+library(ggplot2)
+gm <- lm(price ~., data = diamonds)
+
+summary(gm)$coefficients
+
+```
+
+--- .class #id 
+
+## The information we can do without
+
+* If we evaluate the marginal contribution if each variable to a regression model (the difference in variance explained r-squared between a model with all the predictors and a model without the variable), we see that each variable contributes to very little marginaly.
+
+* This is likely because some variables are correlated, and therefore the absence of a variable is well compensated by its correlates.
+
+* This justifies our choice to propose a prodiction engine where some variables can be omitted.
+
+```{r, echo=FALSE, dpi=100 }
+library(ggplot2)
+gm <- lm(price ~., data = diamonds)
+
+v  <- c("carat", "cut", "color", "clarity", "x", "y", "z", "depth", "table")
+r <- c()
+
+for(i in 1:length(v)){
+  vi <- v[!v == v[i]]
+  f <- formula(paste("price", "~",paste(vi, collapse = " + ")))
+  m <- lm(f, data = diamonds)
+  r <- c(r, summary(m)$r.squared)
+}
+
+gr <- summary(gm)$r.squared
+
+rcontrib <- gr - r
+
+contribs <- data.frame(v, rcontrib)
+names(contribs) <- c("variable", "contribution")
+
+print(contribs)
+```
+
+
+--- .class #id 
+
+## Put a price with limited information
+
+* The original dataset includes 9 variables, but you don't necessiraly know everything about the diamond you want to estimate. Diamond pricer allows you to select only the variables that you know, and recalculates a model in real-time to predict with these variables only.
+
+* There is 362880 possible models.
