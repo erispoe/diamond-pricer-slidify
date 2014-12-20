@@ -87,4 +87,6 @@ knit        : slidify::knit2slides
 
 * The original dataset includes 9 variables, but you don't necessiraly know everything about the diamond you want to estimate. Diamond pricer allows you to select only the variables that you know, and recalculates a model in real-time to predict with these variables only.
 
-* There is 362880 possible models.
+* There are 362880 possible models.
+
+* The app uses linear models, which are relatively fast to compute. Therefore, it makes more sense to compute the model corresponding to the user's selected variables on the fly than to precompute and store them all.
